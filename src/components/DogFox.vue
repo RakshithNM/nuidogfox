@@ -1,9 +1,11 @@
 <template>
-  <h1>{{ msg }}</h1>
-  <p>Click start and give browser the permission to use microphone and say "DOG" or "FOX" to see an image of dog or fox.</p>
-  <button @click="toggleStartStop">{{ recognizing ? "STOP" : "START" }}</button>
-  <p>{{ currentAnimal }}</p>
-  <img v-if="picture.image" :src="picture.image" alt="animal-picture">
+  <main>
+    <h1>{{ msg }}</h1>
+    <p>Click start and give browser the permission to use microphone and say "DOG" or "FOX" to see an image of dog or fox.</p>
+    <button @click="toggleStartStop">{{ recognizing ? "STOP" : "START" }}</button>
+    <p>{{ currentAnimal }}</p>
+    <img v-if="picture.image" :src="picture.image" alt="animal-picture">
+  </main>
 </template>
 
 <script lang="ts">
@@ -38,7 +40,6 @@ export default defineComponent({
       }
       else {
         recognition.start();
-        console.log("started recognition")
         recognizing.value = true;
       }
     }
@@ -104,7 +105,7 @@ export default defineComponent({
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
     reset();
-    recognition.onend = reset();
+    recognition.onend = recognition.start;
 
     recognition.onresult = async function(event: SpeechRecognitionEvent) {
       for(let i = event.resultIndex; i < event.results.length; ++i) {
@@ -115,6 +116,15 @@ export default defineComponent({
           picture.value = await getAnimal(animal).catch((e) => console.log("failed to fetch animal"));
         }
       }
+    }
+
+    recognition.onstart = async function(event: SpeechRecognitionEvent) {
+      console.log(event);
+      console.log("started recognition");
+    }
+
+    recognition.onerror = async function(event: SpeechRecognitionEvent) {
+      alert(event.type);
     }
 
     return { 
