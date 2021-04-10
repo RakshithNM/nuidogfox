@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "copy": "cd dist/ && rm -rf src/ && mkdir src/ && cd ../ && cp ./src/modernizr.js dist/src/modernizr.js"
   },
   "dependencies": {
     "vue": "^3.0.5"
