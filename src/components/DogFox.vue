@@ -27,6 +27,7 @@ export default defineComponent({
     const recognizing = ref(false)
     const picture = ref()
     const isSupported = ref(false);
+    let toggleStartStop;
 
     if((window as any).Modernizr.speechrecognition) {
       isSupported.value = true;
@@ -40,8 +41,7 @@ export default defineComponent({
         picture.value = {};
       }
 
-
-      const toggleStartStop = () => {
+      toggleStartStop = () => {
         if(recognizing.value === true) {
           recognition.abort();
           reset();
@@ -143,18 +143,17 @@ export default defineComponent({
         console.log("speech recognition has stopped");
       }
 
-      return {
-        currentAnimal,
-        recognizing,
-        toggleStartStop,
-        picture,
-        isSupported
-      }
     } else {
       isSupported.value = false;
     }
 
-
+    return {
+      currentAnimal,
+      recognizing,
+      toggleStartStop,
+      picture,
+      isSupported
+    }
   }
 })
 </script>
