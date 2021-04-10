@@ -1,5 +1,5 @@
 <template>
-  <DogFox msg="SPEECH RECOGNITION DOGS AND FOXes" />
+  <DogFox msg="SPEECH RECOGNITION DOG AND FOX" />
 </template>
 
 <script lang="ts">

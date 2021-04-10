@@ -17,11 +17,6 @@ export default defineComponent({
     }
   },
   setup: () => {
-    interface IAnimal {
-      image?: string | null
-      message?: string
-      status: string
-    }
     const currentAnimal = ref("")
     const recognizing = ref(false)
     const picture = ref()
@@ -48,31 +43,59 @@ export default defineComponent({
       }
     }
 
-    const getAnimal = async (inAnimal: string): Promise<IAnimal> => {
-      const isDogWord: boolean = ["dog", "Dog", "DOG"].includes(inAnimal.trim())
-      const isFoxWord: boolean = ["fox", "Fox", "FOX"].includes(inAnimal.trim())
-      let result: IAnimal = { image: null, status: "tofetch" };
-      if(isDogWord) {
-        result = await fetch("https://dog.ceo/api/breeds/image/random").then((data) => data.json());
-        if(result.status === "success") {
-          return {
-            image: result.message,
-            status: result.status
-          }
+    interface DogApiResponse {
+      message: string
+      status: string
+    }
+
+    interface FoxApiResponse {
+      image: string
+    }
+
+    interface Animal {
+      status: string
+      image: string | null
+    }
+
+    type RandomAnimalFactory = () => Promise<Animal>
+
+    const dogFactory: RandomAnimalFactory = async () => {
+      const dogApiUrl = `https://dog.ceo/api/breeds/image/random`;
+      const result: DogApiResponse = await fetch(dogApiUrl).then(data => data.json());
+      if(result.status !== 'success') {
+        throw new Error('dog api failure');
+      }
+      return { image: result.message, status: "success" }
+    }
+
+    const foxFactory: RandomAnimalFactory = async () => {
+      const fetchApiUrl = `https://randomfox.ca/floof/`;
+      const result: FoxApiResponse = await fetch(fetchApiUrl).then(data => data.json());
+      return { image: result.image, status: "success" }
+    }
+
+    type NamedAnimalFactory = (name: string) => Promise<Animal>
+
+    const createRandomNamedAnimalFactory = (randomFactories: {[key: string]: RandomAnimalFactory}): NamedAnimalFactory => {
+      return async (name) => {
+        const factory = randomFactories[name.trim().toLowerCase()];
+        if(!factory) {
+          return { image: null, status: "failure"};
+        }
+
+        try {
+          return await factory();
+        } catch(e) {
+          console.log(e);
+          return { image: null, status: "failure" }
         }
       }
-      if(isFoxWord) {
-        result = await fetch("https://randomfox.ca/floof/").then((data) => data.json());
-        return {
-          image: result.image,
-          status: "success"
-        }
-      }
-      return {
-        image: null,
-        status: "failure"
-      }
-    };
+    }
+
+    const getAnimal: NamedAnimalFactory = createRandomNamedAnimalFactory({
+      dog: dogFactory,
+      fox: foxFactory
+    })
 
     speechRecognitionList.addFromString(grammar, 1);
     recognition.grammars = speechRecognitionList;
