@@ -34,14 +34,13 @@ export default defineComponent({
     }
 
     const toggleStartStop = () => {
-      if(recognizing.value) {
-        recognition.stop();
+      if(recognizing.value === true) {
+        recognition.abort();
         reset();
+        return;
       }
-      else {
-        recognition.start();
-        recognizing.value = true;
-      }
+      recognition.start();
+      recognizing.value = true;
     }
 
     interface DogApiResponse {
@@ -111,7 +110,10 @@ export default defineComponent({
       for(let i = event.resultIndex; i < event.results.length; ++i) {
         if(event.results[i].isFinal) {
           console.log(event);
-          let animal = event.results[i][0].transcript;
+          let animal = event.results[i][0].transcript.trim();
+          if(animal.split(" ").length > 1) {
+            animal = animal.split(" ")[0];
+          }
           currentAnimal.value = animal;
           picture.value = await getAnimal(animal).catch((e) => console.log("failed to fetch animal"));
         }
@@ -124,7 +126,13 @@ export default defineComponent({
     }
 
     recognition.onerror = async function(event: SpeechRecognitionEvent) {
-      alert(event.type);
+      console.error(event);
+      console.log("an error occured");
+    }
+
+    recognition.onspeechend = function() {
+      recognition.stop();
+      console.log("speech recognition has stopped");
     }
 
     return { 
