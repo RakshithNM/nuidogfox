@@ -8,7 +8,7 @@
     <img v-if="picture.image" :src="picture.image" alt="animal-picture">
   </main>
   <main v-else class="full">
-    <p><strong>Speech Recognition Feature is not supported by this browser, consider updating to the latest chrome and try using it on a computer.</strong></p>
+    <p><strong>Speech Recognition feature is not supported by this browser/device, consider updating to the latest chrome and try using it on a computer.</strong></p>
   </main>
 </template>
 
