@@ -129,12 +129,12 @@ export default defineComponent({
 
       recognition.addEventListener('end', (e: SpeechRecognitionEvent) => {
         setTimeout(() => {
-          recognition.start();
           diagnostic.value = "";
           recognizing.value = true;
         }, 1000)
-        diagnostic.value = `You tried stopping the recognition, starting again
-        in one second`;
+        diagnostic.value = `Stopped/No speech detected, starting recognition
+        again for demo purposes`
+        recognition.start();
       });
 
       recognition.onstart = async function(event: SpeechRecognitionEvent) {
@@ -149,12 +149,6 @@ export default defineComponent({
           at the moment, kindly swich to latest chrome on a computer`;
         }
         console.log("an error occured");
-      }
-
-      recognition.onspeechend = function() {
-        recognition.stop();
-        recognizing.value = false;
-        console.log("speech recognition has stopped");
       }
 
     } else {
