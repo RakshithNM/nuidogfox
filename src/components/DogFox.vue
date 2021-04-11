@@ -1,9 +1,10 @@
 <template>
   <main v-if="isSupported">
     <h1>{{ msg }}</h1>
-    <p>Click start and give browser the permission to use microphone and say "DOG" or "FOX" to see an image of dog or fox.</p>
+    <p><strong>Click start and give browser the permission to use microphone and
+    say "DOG" or "FOX" to see an image of dog or fox.</strong></p>
     <button @click="toggleStartStop">{{ recognizing ? "STOP" : "START" }}</button>
-    <p>{{ currentAnimal }}</p>
+    <p><strong>{{ diagnostic }}</strong></p>
     <img v-if="picture.image" :src="picture.image" alt="animal-picture">
   </main>
   <main v-else class="full">
@@ -23,7 +24,7 @@ export default defineComponent({
     }
   },
   setup: () => {
-    const currentAnimal = ref("")
+    const diagnostic = ref("")
     const recognizing = ref(false)
     const picture = ref()
     const isSupported = ref(false);
@@ -37,7 +38,7 @@ export default defineComponent({
 
       const reset = () => {
         recognizing.value = false;
-        currentAnimal.value = "";
+        diagnostic.value = "";
         picture.value = {};
       }
 
@@ -122,7 +123,7 @@ export default defineComponent({
             if(animal.split(" ").length > 1) {
               animal = animal.split(" ")[0];
             }
-            currentAnimal.value = animal;
+            diagnostic.value = animal;
             picture.value = await getAnimal(animal).catch((e) => console.log("failed to fetch animal"));
           }
         }
@@ -133,8 +134,12 @@ export default defineComponent({
         console.log("started recognition");
       }
 
-      recognition.onerror = async function(event: SpeechRecognitionEvent) {
+      recognition.onerror = async function(event: SpeechRecognitionErrorEvent) {
         console.error(event);
+        if(event.type === "error" && event.error === "language-not-supported") {
+          diagnostic.value = `Speech Recognition is not supported by the browser
+          at the moment, kindly swich to latest chrome on a computer`;
+        }
         console.log("an error occured");
       }
 
@@ -148,7 +153,7 @@ export default defineComponent({
     }
 
     return {
-      currentAnimal,
+      diagnostic,
       recognizing,
       toggleStartStop,
       picture,
