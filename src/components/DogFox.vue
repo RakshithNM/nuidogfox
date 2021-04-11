@@ -3,7 +3,7 @@
     <h1>{{ msg }}</h1>
     <p><strong>Click start and give browser the permission to use microphone and
     say "DOG" or "FOX" to see an image of dog or fox.</strong></p>
-    <button @click="toggleStartStop">{{ recognizing ? "STOP" : "START" }}</button>
+    <button v-if="!recognizing" @click="start">START</button>
     <p><strong>{{ diagnostic }}</strong></p>
     <img v-if="picture.image" :src="picture.image" alt="animal-picture">
   </main>
@@ -27,7 +27,7 @@ export default defineComponent({
     const recognizing = ref(false)
     const picture = ref()
     const isSupported = ref(false);
-    let toggleStartStop;
+    let start;
 
     if((window as any).Modernizr.speechrecognition) {
       isSupported.value = true;
@@ -41,15 +41,12 @@ export default defineComponent({
         picture.value = {};
       }
 
-      toggleStartStop = () => {
-        if(recognizing.value === true) {
-          recognition.stop();
-          reset();
-          return;
+      start = () => {
+        if(recognizing.value == false) {
+          recognition.start();
+          diagnostic.value = `Say DOG or FOX to fetch an image`;
+          recognizing.value = true;
         }
-        recognition.start();
-        diagnostic.value = `Say DOG or FOX to fetch an image`;
-        recognizing.value = true;
       }
 
       interface DogApiResponse {
@@ -78,8 +75,8 @@ export default defineComponent({
       }
 
       const foxFactory: RandomAnimalFactory = async () => {
-        const fetchApiUrl = `https://randomfox.ca/floof/`;
-        const result: FoxApiResponse = await fetch(fetchApiUrl).then(data => data.json());
+        const foxApiUrl = `https://randomfox.ca/floof/`;
+        const result: FoxApiResponse = await fetch(foxApiUrl).then(data => data.json());
         return { image: result.image, status: "success" }
       }
 
@@ -122,7 +119,14 @@ export default defineComponent({
             if(animal.split(" ").length > 1) {
               animal = animal.split(" ")[0];
             }
-            diagnostic.value = animal;
+            const possibleAnimals = ['dog', 'fox'];
+            if(possibleAnimals.includes(animal.toLowerCase())) {
+              diagnostic.value = animal;
+            } else {
+              diagnostic.value = `you said something else or browser has no
+              confidence(this can happen if you use a bluetooth mic) that you
+              said the one of the right words(dog or fox)`;
+            }
             picture.value = await getAnimal(animal).catch((e) => console.log("failed to fetch animal"));
           }
         }
@@ -133,8 +137,8 @@ export default defineComponent({
           diagnostic.value = "";
           recognizing.value = true;
         }, 2000)
-        diagnostic.value = `Stopped/No speech detected, starting recognition
-        again for demo purposes`
+        diagnostic.value = `Say DOG or FOX, so we can fetch an image of a dog or
+        fox`;
         recognition.start();
       });
 
@@ -144,7 +148,6 @@ export default defineComponent({
       }
 
       recognition.onerror = async function(event: SpeechRecognitionErrorEvent) {
-        console.error(event);
         if(event.type === "error" && event.error === "language-not-supported") {
           diagnostic.value = `Speech Recognition is not supported by the browser
           at the moment, kindly swich to latest chrome on a computer`;
@@ -152,7 +155,6 @@ export default defineComponent({
         if(event.type === "error" && event.error === "no-speech") {
           diagnostic.value = `You are not speaking`;
         }
-        console.log("an error occured");
       }
 
     } else {
@@ -162,7 +164,7 @@ export default defineComponent({
     return {
       diagnostic,
       recognizing,
-      toggleStartStop,
+      start,
       picture,
       isSupported
     }
