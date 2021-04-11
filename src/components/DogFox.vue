@@ -4,7 +4,7 @@
     <p><strong>Click start and give browser the permission to use microphone and
     say "DOG" or "FOX" to see an image of dog or fox.</strong></p>
     <button v-if="!recognizing" @click="start">START</button>
-    <p><strong>{{ diagnostic }}</strong></p>
+    <p><strong v-html="diagnostic"></strong></p>
     <img v-if="picture.image" :src="picture.image" alt="animal-picture">
   </main>
   <main v-else class="full">
@@ -112,9 +112,9 @@ export default defineComponent({
       reset();
 
       recognition.onresult = async function(event: SpeechRecognitionEvent) {
+        console.log(event);
         for(let i = event.resultIndex; i < event.results.length; ++i) {
           if(event.results[i].isFinal) {
-            console.log(event);
             let animal = event.results[i][0].transcript.trim();
             if(animal.split(" ").length > 1) {
               animal = animal.split(" ")[0];
@@ -123,7 +123,7 @@ export default defineComponent({
             if(possibleAnimals.includes(animal.toLowerCase())) {
               diagnostic.value = animal;
             } else {
-              diagnostic.value = `you said something else or browser has no
+              diagnostic.value = `you said <mark>${animal}</mark> or browser has no
               confidence(this can happen if you use a bluetooth mic) that you
               said the one of the right words(dog or fox)`;
             }
