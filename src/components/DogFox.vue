@@ -119,7 +119,14 @@ export default defineComponent({
             if(animal.split(" ").length > 1) {
               animal = animal.split(" ")[0];
             }
-            diagnostic.value = animal;
+            const possibleAnimals = ['dog', 'fox'];
+            if(possibleAnimals.includes(animal.toLowerCase())) {
+              diagnostic.value = animal;
+            } else {
+              diagnostic.value = `you said something else or browser has no
+              confidence(this can happen if you use a bluetooth mic) that you
+              said the one of the right words(dog or fox)`;
+            }
             picture.value = await getAnimal(animal).catch((e) => console.log("failed to fetch animal"));
           }
         }
