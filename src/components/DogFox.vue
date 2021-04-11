@@ -14,6 +14,7 @@
 
 <script lang="ts">
 import { ref, defineComponent } from 'vue'
+
 export default defineComponent({
   name: 'DogFox',
   props: {
@@ -28,8 +29,11 @@ export default defineComponent({
     const picture = ref()
     const isSupported = ref(false);
     let start;
+    const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    const isEdge = /Edg/.test(navigator.userAgent) || /Edge/.test(navigator.userAgent);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(navigator.userAgent)
 
-    if((window as any).Modernizr.speechrecognition) {
+    if((window as any).Modernizr.speechrecognition && isChrome && !isEdge && !isMobile) {
       isSupported.value = true;
       let grammar = `#JSGF V1.0; grammar animal; public <animal> = dog | fox ;`
       let recognition = new (window as any).webkitSpeechRecognition();
