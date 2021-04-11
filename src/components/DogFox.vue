@@ -48,6 +48,7 @@ export default defineComponent({
           return;
         }
         recognition.start();
+        diagnostic.value = `Say DOG or FOX to fetch an image`;
         recognizing.value = true;
       }
 
@@ -131,7 +132,7 @@ export default defineComponent({
         setTimeout(() => {
           diagnostic.value = "";
           recognizing.value = true;
-        }, 1000)
+        }, 2000)
         diagnostic.value = `Stopped/No speech detected, starting recognition
         again for demo purposes`
         recognition.start();
@@ -147,6 +148,9 @@ export default defineComponent({
         if(event.type === "error" && event.error === "language-not-supported") {
           diagnostic.value = `Speech Recognition is not supported by the browser
           at the moment, kindly swich to latest chrome on a computer`;
+        }
+        if(event.type === "error" && event.error === "no-speech") {
+          diagnostic.value = `You are not speaking`;
         }
         console.log("an error occured");
       }
