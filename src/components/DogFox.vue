@@ -43,7 +43,7 @@ export default defineComponent({
 
       toggleStartStop = () => {
         if(recognizing.value === true) {
-          recognition.abort();
+          recognition.stop();
           reset();
           return;
         }
@@ -112,7 +112,6 @@ export default defineComponent({
       recognition.interimResults = true;
       recognition.maxAlternatives = 1;
       reset();
-      recognition.onend = recognition.start;
 
       recognition.onresult = async function(event: SpeechRecognitionEvent) {
         for(let i = event.resultIndex; i < event.results.length; ++i) {
@@ -127,6 +126,16 @@ export default defineComponent({
           }
         }
       }
+
+      recognition.addEventListener('end', (e: SpeechRecognitionEvent) => {
+        setTimeout(() => {
+          recognition.start();
+          diagnostic.value = "";
+          recognizing.value = true;
+        }, 1000)
+        diagnostic.value = `You tried stopping the recognition, starting again
+        in one second`;
+      });
 
       recognition.onstart = async function(event: SpeechRecognitionEvent) {
         console.log(event);
@@ -144,6 +153,7 @@ export default defineComponent({
 
       recognition.onspeechend = function() {
         recognition.stop();
+        recognizing.value = false;
         console.log("speech recognition has stopped");
       }
 
